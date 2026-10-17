@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zero-Trust AI Gateway | Security Admin SOC</title>
+  <style>
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-card: #111827;
+      --bg-input: #1f2937;
+      --border: #374151;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --accent-blue: #3b82f6;
+      --status-allow: #10b981;
+      --status-sanitize: #f59e0b;
+      --status-block: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      padding: 24px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .brand h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand p {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .api-config {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .api-config input {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: 310px;
+      font-size: 0.85rem;
+    }
+
+    button {
+      background: var(--accent-blue);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button.secondary {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+    }
+
+    button.danger {
+      background: #7f1d1d;
+      border: 1px solid var(--status-block);
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .metric-card .label {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-card .value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .panel h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .preset-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .preset-btn {
+      font-size: 0.75rem;
+      padding: 6px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+    }
+
+    textarea {
+      width: 100%;
+      height: 115px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-main);
+      padding: 10px;
+      font-size: 0.9rem;
+      resize: vertical;
+      margin-bottom: 12px;
+    }
+
+    .response-box {
+      margin-top: 14px;
+      padding: 12px;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 0.72rem;
+    }
+
+    .badge.ALLOWED {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--status-allow);
+      border: 1px solid var(--status-allow);
+    }
+
+    .badge.SANITIZED {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--status-sanitize);
+      border: 1px solid var(--status-sanitize);
+    }
+
+    .badge.BLOCKED {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--status-block);
+      border: 1px solid var(--status-block);
+    }
+
+    .tag {
+      display: inline-block;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      margin: 2px 4px 2px 0;
+      color: #e5e7eb;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--status-allow);
+    }
+
+    .status-dot.offline {
+      background: var(--status-block);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <h1>
+          <span id="statusDot" class="status-dot"></span>
+          Zero-Trust AI Gateway &amp; Prompt Firewall
+        </h1>
+        <p>Enterprise AI Security Middleware | OWASP LLM01 &amp; LLM06 Enforcement | Model: llama-3.1-8b-instant</p>
+      </div>
+      <div class="api-config">
+        <input type="text" id="backendUrlInput" placeholder="https://your-gateway.onrender.com" />
+        <button id="saveUrlBtn" class="secondary">Connect API</button>
+        <button id="refreshBtn" class="secondary">Refresh Logs</button>
+        <button id="clearBtn" class="danger">Clear Logs</button>
+      </div>
+    </header>
+
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="label">Total Requests Inspected</div>
+        <div class="value" id="metricTotal">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Injections Blocked (LLM01)</div>
+        <div class="value" id="metricBlocked" style="color: var(--status-block);">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">PII Entities Redacted (LLM06)</div>
+        <div class="value" id="metricRedacted" style="color: var(--status-sanitize);">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Total Groq Tokens</div>
+        <div class="value" id="metricTokens" style="color: var(--accent-blue);">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="label">Avg Gateway Latency</div>
+        <div class="value" id="metricLatency">0 ms</div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <!-- Left Column: Live Firewall Tester -->
+      <div class="panel">
+        <h2>Live Prompt Firewall Simulator</h2>
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+          Select a preset scenario or type a custom prompt to test real-time inspection:
+        </p>
+        <div class="preset-group">
+          <button class="preset-btn" data-preset="safe">✅ Safe Query</button>
+          <button class="preset-btn" data-preset="pii">🛡️ PII Leak (DLP)</button>
+          <button class="preset-btn" data-preset="injection">🚨 Prompt Injection</button>
+        </div>
+        <textarea id="promptInput" placeholder="Enter prompt to route through the Zero-Trust AI Gateway..."></textarea>
+        <button id="sendPromptBtn" style="width: 100%;">Inspect &amp; Forward to Groq LLM</button>
+        <div class="response-box" id="gatewayOutput">Gateway response will appear here...</div>
+      </div>
+
+      <!-- Right Column: Real-Time Audit Logs -->
+      <div class="panel">
+        <h2>
+          <span>Immutable Security Audit Log</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted);" id="lastUpdated">Auto-polling every 5s</span>
+        </h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Time (UTC)</th>
+                <th>Action</th>
+                <th>Threat Score</th>
+                <th>Sanitized Prompt (Forwarded to LLM)</th>
+                <th>Policies / DLP Entities</th>
+                <th>Tokens &amp; Latency</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--text-muted);">
+                  Connecting to gateway backend...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
